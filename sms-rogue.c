@@ -5,22 +5,24 @@
 
 #define PF_OFFSET_X 0
 #define PF_OFFSET_Y 0
+#define PF_WIDTH 32
+#define PF_HEIGHT 24
 
-char map[24][32];
+char map[PF_HEIGHT][PF_WIDTH];
 
 void draw_map() {
   char *o;
-  unsigned int buffer[32], *d;
+  unsigned int buffer[PF_WIDTH], *d;
   unsigned int i, j;
 
   o = map[0];
-  for (i = 0; i != 24; i++) {
+  for (i = 0; i != PF_HEIGHT; i++) {
     d = buffer;
-    for (j = 0; j != 32; j++) {
+    for (j = 0; j != PF_WIDTH; j++) {
       *d = *o - 32;
       o++; d++;
     }
-    SMS_loadTileMap (0, i, buffer, 64);
+    SMS_loadTileMap (0, i, buffer, PF_WIDTH << 1);
   }
 }
 
