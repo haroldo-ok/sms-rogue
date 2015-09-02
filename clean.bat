@@ -8,3 +8,4 @@ del *.rel
 del *.sym
 del *.asm
 del *.sns
+del *.sms
