@@ -117,10 +117,20 @@ void draw_corridor_y(unsigned char x1, unsigned char y1, unsigned char x2, unsig
 }
 
 void create_section(unsigned char x, unsigned char y, struct section *sec) {
-  sec->c.x1 = x;
-  sec->c.y1 = y;
-  sec->c.x2 = x + 5;
-  sec->c.y2 = y + 5;
+  unsigned char max_x = x + SEC_WIDTH - 1;
+  unsigned char max_y = y + SEC_HEIGHT - 1;
+
+  sec->c.x1 = x + rand() % (SEC_WIDTH - SEC_MIN_W);
+  sec->c.y1 = y + rand() % (SEC_HEIGHT - SEC_MIN_H);
+  sec->c.x2 = sec->c.x1 + SEC_MIN_W;
+  sec->c.y2 = sec->c.y1 + SEC_MIN_H;
+
+  if (sec->c.x2 < max_x) {
+    sec->c.x2 += rand() % (max_x - sec->c.x2);
+  }
+  if (sec->c.y2 < max_y) {
+    sec->c.y2 += rand() % (max_y - sec->c.y2);
+  }
 }
 
 void draw_section(struct section *sec) {
@@ -160,16 +170,9 @@ void simple_rl(void)
 {
   unsigned short kp;
 
-  /*
-  draw_room(0, 0, 4, 5);
-  draw_room(4, 8, 7, 6);
-  draw_room(12, 1, 6, 5);
-  draw_room(12, 9, 7, 5);
-  draw_corridor_y(2, 4, 6, 8);
-  draw_corridor_y(13, 9, 16, 5);
-  draw_corridor_x(3, 1, 12, 4);
-  */
   create_sections();
+  px = sections[0][0].c.x1 + 2;
+  py = sections[0][0].c.y1 + 2;
 
   draw_map();
   draw_char(px, py, '@');
