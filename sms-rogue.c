@@ -5,9 +5,27 @@
 
 #define PF_OFFSET_X 0
 #define PF_OFFSET_Y 0
+
 #define PF_WIDTH 32
 #define PF_HEIGHT 24
 
+#define SEC_COUNT_X 3
+#define SEC_COUNT_Y 3
+#define SEC_COUNT (SEC_COUNT_X * SEC_COUNT_Y)
+#define SEC_WIDTH (PF_WIDTH / SEC_COUNT_X)
+#define SEC_HEIGHT (PF_HEIGHT / SEC_COUNT_Y)
+#define SEC_MIN_W 4
+#define SEC_MIN_H 4
+
+struct box {
+  unsigned char x1, y1, x2, y2;
+};
+
+struct section {
+  struct box c;
+};
+
+struct section sections[SEC_COUNT_Y][SEC_COUNT_Y];
 char map[PF_HEIGHT][PF_WIDTH];
 
 void draw_map() {
@@ -98,6 +116,32 @@ void draw_corridor_y(unsigned char x1, unsigned char y1, unsigned char x2, unsig
   map[y2][x2] = '*';
 }
 
+void create_section(unsigned char x, unsigned char y, struct section *sec) {
+  sec->c.x1 = x;
+  sec->c.y1 = y;
+  sec->c.x2 = x + 5;
+  sec->c.y2 = y + 5;
+}
+
+void draw_section(struct section *sec) {
+  draw_room(sec->c.x1, sec->c.y1,
+      sec->c.x2 - sec->c.x1 + 1, sec->c.y2 - sec->c.y1 + 1);
+}
+
+void create_sections() {
+    // Sector number / sector coordinate
+    unsigned char secn_x, secn_y, secc_x, secc_y;
+    struct section *sec = sections[0];
+
+    for (secn_y = 0, secc_y = 0; secn_y != SEC_COUNT_Y; secn_y++, secc_y += SEC_HEIGHT) {
+      for (secn_x = 0, secc_x = 0; secn_x != SEC_COUNT_X; secn_x++, secc_x += SEC_WIDTH) {
+        create_section(secc_x, secc_y, sec);
+        draw_section(sec);
+        sec++;
+      }
+    }
+}
+
 void draw_char(unsigned char x, unsigned char y, char c) {
   SMS_setTileatXY(x + PF_OFFSET_X, y + PF_OFFSET_Y, c - 32);
 }
@@ -116,6 +160,7 @@ void simple_rl(void)
 {
   unsigned short kp;
 
+  /*
   draw_room(0, 0, 4, 5);
   draw_room(4, 8, 7, 6);
   draw_room(12, 1, 6, 5);
@@ -123,6 +168,9 @@ void simple_rl(void)
   draw_corridor_y(2, 4, 6, 8);
   draw_corridor_y(13, 9, 16, 5);
   draw_corridor_x(3, 1, 12, 4);
+  */
+  create_sections();
+
   draw_map();
   draw_char(px, py, '@');
   SMS_displayOn();
