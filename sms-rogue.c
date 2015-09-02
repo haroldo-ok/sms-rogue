@@ -178,14 +178,11 @@ void create_random_corridor_y(
   draw_corridor_y(x1, ya, x2, yb);
 }
 
-void create_corridor(unsigned char x, unsigned char y) {
-  unsigned char dir = rand() & DIR_MASK;
-  unsigned char x2, y2;
+void create_corridor(char x1, char y1, char x2, char y2, unsigned char dir) {
   struct section *sec1, *sec2;
 
-  if (can_go[y][x][dir]) {
-    x2 = x; y2 = y;
-
+  if (can_go[y1][x1][dir]) {
+    x2 = x1; y2 = y1;
     switch (dir) {
       case DIR_UP:
         y2--;
@@ -201,17 +198,16 @@ void create_corridor(unsigned char x, unsigned char y) {
         break;
     }
 
-    sec1 = &sections[y][x];
-    can_go[y][x][dir] = false;
+    sec1 = &sections[y1][x1];
+    can_go[y1][x1][dir] = false;
     sec2 = &sections[y2][x2];
     can_go[y2][x2][(dir + 2) & DIR_MASK] = false;
 
     switch (dir) {
       case DIR_UP:
-        //draw_corridor_x(sec1->c.x1, sec1->c.y1, sec2->c.x2, sec2->c.y2);
         create_random_corridor_y(
             sec1->c.x1, sec1->c.x2, sec1->c.y1,
-            sec2->c.x2, sec2->c.x2, sec2->c.y2);
+            sec2->c.x1, sec2->c.x2, sec2->c.y2);
         break;
       case DIR_DOWN:
         create_random_corridor_y(
@@ -232,9 +228,65 @@ void create_corridor(unsigned char x, unsigned char y) {
   }
 }
 
+void random_walk() {
+  unsigned char dir, remaining, extra_steps;
+  char x1, y1, x2, y2;
+  bool visited[SEC_COUNT_Y][SEC_COUNT_X];
+
+  remaining = SEC_COUNT;
+  for (y1 = 0; y1 != SEC_COUNT_Y; y1++) {
+    for (x1 = 0; x1 != SEC_COUNT_X; x1++) {
+      visited[y1][x1] = false;
+    }
+  }
+
+  x1 = rand() % SEC_COUNT_X;
+  y1 = rand() % SEC_COUNT_Y;
+
+  extra_steps = 8;
+  while (remaining || extra_steps) {
+    // Check if a new room has been visited
+    if (!visited[y1][x1]) {
+      visited[y1][x1] = true;
+      remaining--;
+    }
+
+    // After visiting everything, walk some extra steps
+    if (!remaining && extra_steps) {
+      extra_steps--;
+    }
+
+    // Choose a direction to move
+    dir = rand() & DIR_MASK;
+
+    // Try to move in the given direction
+    x2 = x1; y2 = y1;
+    switch (dir) {
+      case DIR_UP:
+        y2--;
+        break;
+      case DIR_DOWN:
+        y2++;
+        break;
+      case DIR_LEFT:
+        x2--;
+        break;
+      case DIR_RIGHT:
+        x2++;
+        break;
+    }
+
+    // If the direction is valid, move
+    if (x2 >= 0 && x2 < SEC_COUNT_X && y2 >= 0 && y2 < SEC_COUNT_Y) {
+      create_corridor(x1, y1, x2, y2, dir);
+      x1 = x2; y1 = y2;
+    }
+  }
+
+}
+
 void create_corridors() {
   unsigned char x, y, i;
-  memset(**can_go, true, SEC_COUNT * DIR_COUNT);
 
   for (y = 0; y != SEC_COUNT_Y; y++) {
     for (x = 0; x != SEC_COUNT_X; x++) {
@@ -254,13 +306,7 @@ void create_corridors() {
     can_go[y][SEC_COUNT_X - 1][DIR_RIGHT] = false;
   }
 
-  for (i = 0; i != 3; i++) {
-    for (y = 0; y != SEC_COUNT_Y; y++) {
-      for (x = 0; x != SEC_COUNT_X; x++) {
-        create_corridor(x, y);
-      }
-    }
-  }
+  random_walk();
 }
 
 void draw_char(unsigned char x, unsigned char y, char c) {
