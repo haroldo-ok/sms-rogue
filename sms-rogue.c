@@ -78,7 +78,7 @@ void draw_corridor_x(unsigned char x1, unsigned char y1, unsigned char x2, unsig
   char dy = y1 < y2 ? 1 : -1;
   char dx = x1 < x2 ? 1 : -1;
   unsigned char len = x1 < x2 ? x2 - x1 : x1 - x2;
-  unsigned char xh = rand() % len;
+  unsigned char xh = 1 + (len ? rand() % (len - 1) : 0);
   unsigned char x, y;
 
   xh = x1 < x2 ? x1 + xh : x1 - xh;
@@ -103,7 +103,7 @@ void draw_corridor_y(unsigned char x1, unsigned char y1, unsigned char x2, unsig
   char dy = y1 < y2 ? 1 : -1;
   char dx = x1 < x2 ? 1 : -1;
   unsigned char len = y1 < y2 ? y2 - y1 : y1 - y2;
-  unsigned char yh = 1 + rand() % len;
+  unsigned char yh = 1 + (len ? rand() % (len - 1) : 0);
   unsigned char x, y;
 
   yh = y1 < y2 ? y1 + yh : y1 - yh;
@@ -162,6 +162,14 @@ void create_sections() {
 
 bool can_go[SEC_COUNT_Y][SEC_COUNT_X][DIR_COUNT];
 
+void create_random_corridor_x(
+    unsigned char xa, unsigned char ya1, unsigned char ya2,
+    unsigned char xb, unsigned char yb1, unsigned char yb2) {
+  unsigned char y1 = ya1 + 1 + rand() % (ya2 - ya1 - 1);
+  unsigned char y2 = yb1 + 1 + rand() % (yb2 - yb1 - 1);
+  draw_corridor_x(xa, y1, xb, y2);
+}
+
 void create_random_corridor_y(
     unsigned char xa1, unsigned char xa2, unsigned char ya,
     unsigned char xb1, unsigned char xb2, unsigned char yb) {
@@ -171,11 +179,11 @@ void create_random_corridor_y(
 }
 
 void create_corridor(unsigned char x, unsigned char y) {
-  unsigned char dir = DIR_DOWN;
+  unsigned char dir = rand() & DIR_MASK;
   unsigned char x2, y2;
   struct section *sec1, *sec2;
 
-  if (true || can_go[y][x][dir]) {
+  if (can_go[y][x][dir]) {
     x2 = x; y2 = y;
 
     switch (dir) {
@@ -211,20 +219,31 @@ void create_corridor(unsigned char x, unsigned char y) {
             sec2->c.x1, sec2->c.x2, sec2->c.y1);
         break;
       case DIR_LEFT:
-        draw_corridor_x(sec1->c.x1, sec1->c.y1, sec2->c.x2, sec2->c.y2);
+        create_random_corridor_x(
+            sec1->c.x1, sec1->c.y1, sec1->c.y2,
+            sec2->c.x2, sec2->c.y1, sec2->c.y2);
         break;
       case DIR_RIGHT:
-        draw_corridor_x(sec1->c.x1, sec1->c.y1, sec2->c.x2, sec2->c.y2);
+        create_random_corridor_x(
+            sec1->c.x2, sec1->c.y1, sec1->c.y2,
+            sec2->c.x1, sec2->c.y1, sec2->c.y2);
         break;
     }
   }
 }
 
 void create_corridors() {
-  unsigned char x, y;
+  unsigned char x, y, i;
   memset(**can_go, true, SEC_COUNT * DIR_COUNT);
 
-/*
+  for (y = 0; y != SEC_COUNT_Y; y++) {
+    for (x = 0; x != SEC_COUNT_X; x++) {
+      for (i = 0; i != DIR_COUNT; i++) {
+        can_go[y][x][i] = true;
+      }
+    }
+  }
+
   for (x = 0; x != SEC_COUNT_X; x++) {
     can_go[0][x][DIR_UP] = false;
     can_go[SEC_COUNT_Y - 1][x][DIR_DOWN] = false;
@@ -234,18 +253,12 @@ void create_corridors() {
     can_go[y][0][DIR_LEFT] = false;
     can_go[y][SEC_COUNT_X - 1][DIR_RIGHT] = false;
   }
-  */
 
-/*
-  for (y = 0; y != SEC_COUNT_Y; y++) {
-    for (x = 0; x != SEC_COUNT_X; x++) {
-      create_corridor(x, y);
-    }
-  }
-  */
-  for (y = 0; y != SEC_COUNT_Y - 1; y++) {
-    for (x = 0; x != SEC_COUNT_X; x++) {
-      create_corridor(x, y);
+  for (i = 0; i != 3; i++) {
+    for (y = 0; y != SEC_COUNT_Y; y++) {
+      for (x = 0; x != SEC_COUNT_X; x++) {
+        create_corridor(x, y);
+      }
     }
   }
 }
