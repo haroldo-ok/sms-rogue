@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include "SMSlib/src/SMSlib.h"
 #include "gfx.h"
@@ -35,6 +36,10 @@ struct section {
 
 struct section sections[SEC_COUNT_Y][SEC_COUNT_Y];
 char map[PF_HEIGHT][PF_WIDTH];
+
+void putchar (char c) {
+	SMS_setTile(c - 32);
+}
 
 void draw_map() {
   char *o;
@@ -323,6 +328,33 @@ void move_to(int x, int y) {
   }
 }
 
+void title_screen() {
+  unsigned int seed = 1;
+
+  SMS_setNextTileatXY(6, 5);
+  puts("**** SMS-Rogue ****");
+  SMS_setNextTileatXY(6, 7);
+  puts("** Press any key **");
+  SMS_displayOn();
+
+  while (SMS_getKeysStatus()) {
+    SMS_waitForVBlank();
+    seed++;
+  }
+  while (!SMS_getKeysStatus()) {
+    SMS_waitForVBlank();
+    seed++;
+  }
+  while (SMS_getKeysStatus()) {
+    SMS_waitForVBlank();
+    seed++;
+  }
+
+  SMS_displayOff();
+
+  srand(seed ? seed : 1);
+}
+
 void simple_rl(void)
 {
   unsigned short kp;
@@ -378,10 +410,11 @@ void main(void) {
     SMS_setBGPaletteColor(i,0x00);    // black
   SMS_setBGPaletteColor(01,0x3f);     // white
 
+  title_screen();
   simple_rl();
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'
-SMS_EMBED_SDSC_HEADER(0,1, 2015,8,27, "Haroldo-OK\\2015", "SimpleRL for SSM",
-  "This is a port of SimpleRL to Sega Master System - https://github.com/haroldo-ok/SimpleRL.\n"
+SMS_EMBED_SDSC_HEADER(0,2, 2015,9,02, "Haroldo-OK\\2015", "SMS-Rogue",
+  "A roguelike for the Sega Master System - https://github.com/haroldo-ok/sms-rogue.\n"
   "Built using devkitSMS & SMSlib - https://github.com/sverx/devkitSMS");
