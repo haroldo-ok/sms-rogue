@@ -83,7 +83,7 @@ void draw_corridor_x(unsigned char x1, unsigned char y1, unsigned char x2, unsig
   char dy = y1 < y2 ? 1 : -1;
   char dx = x1 < x2 ? 1 : -1;
   unsigned char len = x1 < x2 ? x2 - x1 : x1 - x2;
-  unsigned char xh = 1 + (len ? rand() % (len - 1) : 0);
+  unsigned char xh = 1 + (len > 1 ? rand() % (len - 1) : 0);
   unsigned char x, y;
 
   xh = x1 < x2 ? x1 + xh : x1 - xh;
@@ -108,7 +108,7 @@ void draw_corridor_y(unsigned char x1, unsigned char y1, unsigned char x2, unsig
   char dy = y1 < y2 ? 1 : -1;
   char dx = x1 < x2 ? 1 : -1;
   unsigned char len = y1 < y2 ? y2 - y1 : y1 - y2;
-  unsigned char yh = 1 + (len ? rand() % (len - 1) : 0);
+  unsigned char yh = 1 + (len > 1 ? rand() % (len - 1) : 0);
   unsigned char x, y;
 
   yh = y1 < y2 ? y1 + yh : y1 - yh;
@@ -415,6 +415,6 @@ void main(void) {
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'
-SMS_EMBED_SDSC_HEADER(0,2, 2015,9,02, "Haroldo-OK\\2015", "SMS-Rogue",
+SMS_EMBED_SDSC_HEADER(0,3, 2015,9,03, "Haroldo-OK\\2015", "SMS-Rogue",
   "A roguelike for the Sega Master System - https://github.com/haroldo-ok/sms-rogue.\n"
   "Built using devkitSMS & SMSlib - https://github.com/sverx/devkitSMS");
