@@ -429,6 +429,7 @@ void simple_rl(void)
   create_corridors();
 
   player = create_actor(sections[0][0].c.x1 + 2, sections[0][0].c.y1 + 2, '@');
+  create_actor(sections[SEC_COUNT_Y - 1][SEC_COUNT_X - 1].c.x1 + 2, sections[SEC_COUNT_Y - 1][SEC_COUNT_X - 1].c.y1 + 2, '>');
 
   draw_map();
   SMS_displayOn();
