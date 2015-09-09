@@ -41,6 +41,8 @@ struct actor {
   unsigned char x, y;
   unsigned int hp;
   bool dirty;
+
+  void (*handler)(struct actor *p);
 };
 
 struct section sections[SEC_COUNT_Y][SEC_COUNT_Y];
@@ -382,6 +384,7 @@ struct actor *create_actor(unsigned char x, unsigned char y, char ch) {
 
   p->hp = 1;
   p->dirty = true;
+  p->handler = NULL;
 
   return p;
 }
@@ -413,6 +416,17 @@ void move_actor(struct actor *p, char dx, char dy) {
   }
 }
 
+void move_actors() {
+  struct actor *p;
+  unsigned char i;
+
+  for (i = 0, p = actors; i != actor_count && p->hp; i++, p++) {
+    if (p->hp && p->handler) {
+      p->handler(p);
+    }
+  }
+}
+
 void draw_actors() {
   struct actor *p;
   unsigned char i;
@@ -422,6 +436,24 @@ void draw_actors() {
       SMS_addSprite (p->x << 3, p->y << 3, p->ch - 32);
     }
   }
+}
+
+void act_move_random(struct actor *p) {
+  char x = 0, y = 0;
+
+  switch (rand() & DIR_MASK) {
+    case DIR_UP: y = -1; break;
+    case DIR_DOWN: y = 1; break;
+    case DIR_LEFT: x = -1; break;
+    case DIR_RIGHT: x = 1; break;
+  }
+
+  move_actor(p, x, y);
+}
+
+void create_enemy() {
+  struct actor *enm = create_actor_somewhere('e');
+  enm->handler = act_move_random;
 }
 
 void title_screen() {
@@ -464,6 +496,9 @@ void simple_rl(void)
 
   player = create_actor_somewhere('@');
   create_actor_somewhere('>');
+  create_enemy();
+  create_enemy();
+  create_enemy();
 
   SMS_displayOn();
 
@@ -476,6 +511,10 @@ void simple_rl(void)
     if (kp & PORT_A_KEY_DOWN) { move_actor(player, 0, 1); }
     if (kp & PORT_A_KEY_LEFT) { move_actor(player, -1, 0); }
     if (kp & PORT_A_KEY_RIGHT) { move_actor(player, 1, 0); }
+
+    if (kp) {
+      move_actors();
+    }
 
     SMS_initSprites();
 
@@ -523,6 +562,6 @@ void main(void) {
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'
-SMS_EMBED_SDSC_HEADER(0,4, 2015,9,8, "Haroldo-OK\\2015", "SMS-Rogue",
+SMS_EMBED_SDSC_HEADER(0,5, 2015,9,9, "Haroldo-OK\\2015", "SMS-Rogue",
   "A roguelike for the Sega Master System - https://github.com/haroldo-ok/sms-rogue.\n"
   "Built using devkitSMS & SMSlib - https://github.com/sverx/devkitSMS");
