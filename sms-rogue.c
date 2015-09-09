@@ -336,16 +336,6 @@ void draw_char(unsigned char x, unsigned char y, char c) {
   SMS_setTileatXY(x + PF_OFFSET_X, y + PF_OFFSET_Y, c - 32);
 }
 
-int px = 1, py = 1;
-void move_to(int x, int y) {
-  switch (map[y][x]) {
-    case '.':
-    case '*':
-    case '#':
-      px = x; py = y;
-  }
-}
-
 void init_actors() {
   unsigned char i;
   struct actor *p = actors;
@@ -438,8 +428,6 @@ void simple_rl(void)
   create_sections();
   create_corridors();
 
-  px = sections[0][0].c.x1 + 2;
-  py = sections[0][0].c.y1 + 2;
   player = create_actor(sections[0][0].c.x1 + 2, sections[0][0].c.y1 + 2, '@');
 
   draw_map();
