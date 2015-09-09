@@ -26,6 +26,8 @@
 #define DIR_COUNT 4
 #define DIR_MASK (DIR_COUNT - 1)
 
+#define ACTOR_COUNT 64
+
 struct box {
   unsigned char x1, y1, x2, y2;
 };
@@ -34,8 +36,20 @@ struct section {
   struct box c;
 };
 
+struct actor {
+  char ch, ground_ch;
+  unsigned char x, y;
+  unsigned int hp;
+  bool dirty;
+};
+
 struct section sections[SEC_COUNT_Y][SEC_COUNT_Y];
 char map[PF_HEIGHT][PF_WIDTH];
+
+struct actor actors[ACTOR_COUNT];
+unsigned char actor_count = 0;
+
+struct actor *player;
 
 void putchar (char c) {
 	SMS_setTile(c - 32);
@@ -328,6 +342,58 @@ void move_to(int x, int y) {
   }
 }
 
+void init_actors() {
+  unsigned char i;
+  struct actor *p = actors;
+
+  for (i = ACTOR_COUNT; i; i--) {
+    p->hp = 0;
+    p++;
+  }
+}
+
+struct actor *create_actor(unsigned char x, unsigned char y, char ch) {
+  struct actor *p = actors;
+  unsigned int i;
+
+  for (i = 0; i != actor_count && p->hp; i++) {
+    p++;
+  }
+
+  if (i == actor_count) {
+    actor_count++;
+  }
+
+  p->x = x;
+  p->y = y;
+  p->ch = ch;
+  p->ground_ch = map[y][x];
+  p->hp = 1;
+  p->dirty = true;
+
+  return p;
+}
+
+void move_actor(struct actor *p, char dx, char dy) {
+  unsigned char x = p->x + dx;
+  unsigned char y = p->y + dy;
+
+  switch (map[y][x]) {
+    case '.':
+    case '*':
+    case '#':
+      p->x = x; p->y = y;
+  }
+}
+
+void draw_actor(struct actor *p) {
+  if (!p->hp) {
+    return;
+  }
+
+  draw_char(p->x, p->y, p->ch);
+}
+
 void title_screen() {
   unsigned int seed = 1;
 
@@ -359,10 +425,14 @@ void simple_rl(void)
 {
   unsigned short kp;
 
+  init_actors();
+
   create_sections();
   create_corridors();
+
   px = sections[0][0].c.x1 + 2;
   py = sections[0][0].c.y1 + 2;
+  player = create_actor(sections[0][0].c.x1 + 2, sections[0][0].c.y1 + 2, '@');
 
   draw_map();
   draw_char(px, py, '@');
@@ -375,12 +445,13 @@ void simple_rl(void)
 
     draw_char(px, py, map[py][px]);
 
-    if (kp & PORT_A_KEY_UP) { move_to(px, py - 1); }
-    if (kp & PORT_A_KEY_DOWN) { move_to(px, py + 1); }
-    if (kp & PORT_A_KEY_LEFT) { move_to(px - 1, py); }
-    if (kp & PORT_A_KEY_RIGHT) { move_to(px + 1, py); }
+    if (kp & PORT_A_KEY_UP) { move_actor(player, 0, -1); }
+    if (kp & PORT_A_KEY_DOWN) { move_actor(player, 0, 1); }
+    if (kp & PORT_A_KEY_LEFT) { move_actor(player, -1, 0); }
+    if (kp & PORT_A_KEY_RIGHT) { move_actor(player, 1, 0); }
 
     draw_char(px, py, '@');
+    draw_actor(player);
   }
 }
 
