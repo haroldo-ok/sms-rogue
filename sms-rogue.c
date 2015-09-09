@@ -55,6 +55,10 @@ void putchar (char c) {
 	SMS_setTile(c - 32);
 }
 
+void clear_map() {
+  memset(*map, ' ', PF_WIDTH * PF_HEIGHT);
+}
+
 void draw_map() {
   char *o;
   unsigned int buffer[PF_WIDTH], *d;
@@ -386,13 +390,15 @@ void move_actor(struct actor *p, char dx, char dy) {
   }
 }
 
-void draw_actor(struct actor *p) {
-  if (!p->hp) {
-    return;
-  }
+void draw_actors() {
+  struct actor *p;
+  unsigned char i;
 
-//  draw_char(p->x, p->y, p->ch);
-  SMS_addSprite (p->x << 3, p->y << 3, p->ch - 32);
+  for (i = 0, p = actors; i != actor_count && p->hp; i++, p++) {
+    if (p->hp) {
+      SMS_addSprite (p->x << 3, p->y << 3, p->ch - 32);
+    }
+  }
 }
 
 void title_screen() {
@@ -426,6 +432,7 @@ void simple_rl(void)
 {
   unsigned short kp;
 
+  clear_map();
   init_actors();
 
   create_sections();
@@ -450,7 +457,7 @@ void simple_rl(void)
 
     SMS_initSprites();
 
-    draw_actor(player);
+    draw_actors();
 
     SMS_finalizeSprites();
     SMS_copySpritestoSAT();
