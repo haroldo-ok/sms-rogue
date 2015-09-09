@@ -360,23 +360,43 @@ struct actor *create_actor(unsigned char x, unsigned char y, char ch) {
 
   p->x = x;
   p->y = y;
+
   p->ch = ch;
   p->ground_ch = map[y][x];
+  map[y][x] = p->ch;
+
   p->hp = 1;
   p->dirty = true;
 
   return p;
 }
 
+struct actor *create_actor_somewhere(char ch) {
+}
+
+bool is_wall(char ch) {
+  switch (ch) {
+    case '+':
+    case '-':
+    case '|':
+    case ' ':
+      return true;
+  }
+  return false;
+}
+
+bool is_ground(char ch) {
+  return (ch == '.') || (ch == '#') || (ch == '*');
+}
+
 void move_actor(struct actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
 
-  switch (map[y][x]) {
-    case '.':
-    case '*':
-    case '#':
+  if (is_ground(map[y][x])) {
+      map[p->y][p->x] = p->ground_ch;
       p->x = x; p->y = y;
+      map[p->y][p->x] = p->ch;
   }
 }
 
@@ -427,11 +447,11 @@ void simple_rl(void)
 
   create_sections();
   create_corridors();
+  draw_map();
 
   player = create_actor(sections[0][0].c.x1 + 2, sections[0][0].c.y1 + 2, '@');
   create_actor(sections[SEC_COUNT_Y - 1][SEC_COUNT_X - 1].c.x1 + 2, sections[SEC_COUNT_Y - 1][SEC_COUNT_X - 1].c.y1 + 2, '>');
 
-  draw_map();
   SMS_displayOn();
 
   while (true) {
