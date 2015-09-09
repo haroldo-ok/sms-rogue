@@ -336,6 +336,21 @@ void draw_char(unsigned char x, unsigned char y, char c) {
   SMS_setTileatXY(x + PF_OFFSET_X, y + PF_OFFSET_Y, c - 32);
 }
 
+bool is_wall(char ch) {
+  switch (ch) {
+    case '+':
+    case '-':
+    case '|':
+    case ' ':
+      return true;
+  }
+  return false;
+}
+
+bool is_ground(char ch) {
+  return (ch == '.') || (ch == '#') || (ch == '*');
+}
+
 void init_actors() {
   unsigned char i;
   struct actor *p = actors;
@@ -372,21 +387,19 @@ struct actor *create_actor(unsigned char x, unsigned char y, char ch) {
 }
 
 struct actor *create_actor_somewhere(char ch) {
-}
+  unsigned char x, y;
+  struct section *sec;
 
-bool is_wall(char ch) {
-  switch (ch) {
-    case '+':
-    case '-':
-    case '|':
-    case ' ':
-      return true;
-  }
-  return false;
-}
+  do {
+    x = rand() % SEC_COUNT_X;
+    y = rand() % SEC_COUNT_Y;
+    sec = &sections[y][x];
 
-bool is_ground(char ch) {
-  return (ch == '.') || (ch == '#') || (ch == '*');
+    x = sec->c.x1 + 1 + (rand() % (sec->c.x2 - sec->c.x1));
+    y = sec->c.y1 + 1 + (rand() % (sec->c.y2 - sec->c.y1));
+  } while (!is_ground(map[y][x]));
+
+  return create_actor(x, y, ch);
 }
 
 void move_actor(struct actor *p, char dx, char dy) {
@@ -449,8 +462,8 @@ void simple_rl(void)
   create_corridors();
   draw_map();
 
-  player = create_actor(sections[0][0].c.x1 + 2, sections[0][0].c.y1 + 2, '@');
-  create_actor(sections[SEC_COUNT_Y - 1][SEC_COUNT_X - 1].c.x1 + 2, sections[SEC_COUNT_Y - 1][SEC_COUNT_X - 1].c.y1 + 2, '>');
+  player = create_actor_somewhere('@');
+  create_actor_somewhere('>');
 
   SMS_displayOn();
 
