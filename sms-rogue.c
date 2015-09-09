@@ -391,7 +391,8 @@ void draw_actor(struct actor *p) {
     return;
   }
 
-  draw_char(p->x, p->y, p->ch);
+//  draw_char(p->x, p->y, p->ch);
+  SMS_addSprite (p->x << 3, p->y << 3, p->ch - 32);
 }
 
 void title_screen() {
@@ -435,7 +436,6 @@ void simple_rl(void)
   player = create_actor(sections[0][0].c.x1 + 2, sections[0][0].c.y1 + 2, '@');
 
   draw_map();
-  draw_char(px, py, '@');
   SMS_displayOn();
 
   while (true) {
@@ -443,32 +443,37 @@ void simple_rl(void)
 
     SMS_waitForVBlank();
 
-    draw_char(px, py, map[py][px]);
-
     if (kp & PORT_A_KEY_UP) { move_actor(player, 0, -1); }
     if (kp & PORT_A_KEY_DOWN) { move_actor(player, 0, 1); }
     if (kp & PORT_A_KEY_LEFT) { move_actor(player, -1, 0); }
     if (kp & PORT_A_KEY_RIGHT) { move_actor(player, 1, 0); }
 
-    draw_char(px, py, '@');
+    SMS_initSprites();
+
     draw_actor(player);
+
+    SMS_finalizeSprites();
+    SMS_copySpritestoSAT();
   }
 }
 
 void load_font (void) {
-	unsigned char i, j;
+//	unsigned int i, j;
+  unsigned char i, j;
 	unsigned char buffer[32], *o, *d;
 
 	o = font_fnt;
 	for (i = 0; i != 96; i++) {
 		d = buffer;
 		for (j = 0; j != 8; j++) {
-			*d = *o; d++;	o++;
+			*d = *o; d++;
+			*d = ~(*o);	d++;
 			*d = 0;	d++;
 			*d = 0;	d++;
-			*d = 0;	d++;
+      o++;
 		}
 		SMS_loadTiles(buffer, i, 32);
+    SMS_loadTiles(buffer, i + 256, 32);
 	}
 }
 
@@ -477,15 +482,18 @@ void main(void) {
 
   load_font();
 
-  for (i=0;i<16;i++)
+  for (i=0;i<16;i++) {
     SMS_setBGPaletteColor(i,0x00);    // black
+    SMS_setSpritePaletteColor(i,0x00);    // black
+  }
   SMS_setBGPaletteColor(01,0x3f);     // white
+  SMS_setSpritePaletteColor(01,0x3f);     // white
 
   title_screen();
   simple_rl();
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'
-SMS_EMBED_SDSC_HEADER(0,3, 2015,9,03, "Haroldo-OK\\2015", "SMS-Rogue",
+SMS_EMBED_SDSC_HEADER(0,4, 2015,9,8, "Haroldo-OK\\2015", "SMS-Rogue",
   "A roguelike for the Sega Master System - https://github.com/haroldo-ok/sms-rogue.\n"
   "Built using devkitSMS & SMSlib - https://github.com/sverx/devkitSMS");
