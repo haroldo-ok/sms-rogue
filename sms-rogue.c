@@ -435,10 +435,7 @@ bool can_move_actor(struct actor *p, char dx, char dy) {
 }
 
 void attack_actor(struct actor *atk, struct actor *def) {
-  other->hp++;
-  other->ch = '0' + other->hp;
-
-//  def->hp--;
+  def->hp--;
   if (!def->hp) {
     map[def->y][def->x] = def->ground_ch;
   }
@@ -465,7 +462,7 @@ void move_actors() {
   struct actor *p;
   unsigned char i;
 
-  for (i = 0, p = actors; i != actor_count && p->hp; i++, p++) {
+  for (i = 0, p = actors; i != actor_count; i++, p++) {
     if (p->hp && p->handler) {
       p->handler(p);
     }
@@ -476,7 +473,7 @@ void draw_actors() {
   struct actor *p;
   unsigned char i;
 
-  for (i = 0, p = actors; i != actor_count && p->hp; i++, p++) {
+  for (i = 0, p = actors; i != actor_count; i++, p++) {
     if (p->hp) {
       SMS_addSprite (p->x << 3, p->y << 3, p->ch - 32);
     }
@@ -552,6 +549,7 @@ void simple_rl(void)
 
   player = create_actor_somewhere('@');
   player->handler = act_move_keys;
+  player->hp = 5;
 
   create_actor_somewhere('>');
   create_enemy();
@@ -582,7 +580,6 @@ void simple_rl(void)
 }
 
 void load_font (void) {
-//	unsigned int i, j;
   unsigned char i, j;
 	unsigned char buffer[32], *o, *d;
 
