@@ -354,6 +354,10 @@ bool is_ground(char ch) {
   return (ch == '.') || (ch == '#') || (ch == '*');
 }
 
+bool is_actor(char ch) {
+  return !is_wall(ch) && !is_ground(ch);
+}
+
 void init_actors() {
   unsigned char i;
   struct actor *p = actors;
@@ -406,15 +410,49 @@ struct actor *create_actor_somewhere(char ch) {
   return create_actor(x, y, ch);
 }
 
+struct actor *actor_at(unsigned char x, unsigned char y) {
+  struct actor *p = actors;
+  unsigned int i;
+
+  if (!is_actor(map[y][x])) {
+    return NULL;
+  }
+
+  for (i = 0; i != actor_count; i++) {
+    if (p->hp && p->x == x && p->y == y) {
+      return p;
+    }
+    p++;
+  }
+
+  return NULL;
+}
+
 bool can_move_actor(struct actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
   return is_ground(map[y][x]);
 }
 
+void attack_actor(struct actor *atk, struct actor *def) {
+  other->hp++;
+  other->ch = '0' + other->hp;
+
+//  def->hp--;
+  if (!def->hp) {
+    map[def->y][def->x] = def->ground_ch;
+  }
+}
+
 void move_actor(struct actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
+  struct actor *other = actor_at(x, y);
+
+  if (other) {
+    attack_actor(p, other);
+    return;
+  }
 
   if (can_move_actor(p, dx, dy)) {
       map[p->y][p->x] = p->ground_ch;
@@ -466,7 +504,9 @@ void act_move_random(struct actor *p) {
     }
   } while(tries-- && !can_move_actor(p, x, y));
 
-  move_actor(p, x, y);
+  if (x || y) {
+    move_actor(p, x, y);
+  }
 }
 
 void create_enemy() {
@@ -514,6 +554,9 @@ void simple_rl(void)
   player->handler = act_move_keys;
 
   create_actor_somewhere('>');
+  create_enemy();
+  create_enemy();
+  create_enemy();
   create_enemy();
   create_enemy();
   create_enemy();
