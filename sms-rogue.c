@@ -28,30 +28,30 @@
 
 #define ACTOR_COUNT 64
 
-struct box {
+typedef struct _box {
   unsigned char x1, y1, x2, y2;
-};
+} box;
 
-struct section {
-  struct box c;
-};
+typedef struct _section {
+  box c;
+} section;
 
-struct actor {
+typedef struct _actor {
   char ch, ground_ch;
   unsigned char x, y;
   unsigned int hp;
   bool dirty;
 
-  void (*handler)(struct actor *p);
-};
+  void (*handler)(struct _actor *p);
+} actor;
 
-struct section sections[SEC_COUNT_Y][SEC_COUNT_Y];
+section sections[SEC_COUNT_Y][SEC_COUNT_Y];
 char map[PF_HEIGHT][PF_WIDTH];
 
-struct actor actors[ACTOR_COUNT];
+actor actors[ACTOR_COUNT];
 unsigned char actor_count = 0;
 
-struct actor *player;
+actor *player;
 unsigned short kp;
 
 void putchar (char c) {
@@ -150,7 +150,7 @@ void draw_corridor_y(unsigned char x1, unsigned char y1, unsigned char x2, unsig
   map[y2][x2] = '*';
 }
 
-void create_section(unsigned char x, unsigned char y, struct section *sec) {
+void create_section(unsigned char x, unsigned char y, section *sec) {
   unsigned char max_x = x + SEC_WIDTH - 1;
   unsigned char max_y = y + SEC_HEIGHT - 1;
 
@@ -167,7 +167,7 @@ void create_section(unsigned char x, unsigned char y, struct section *sec) {
   }
 }
 
-void draw_section(struct section *sec) {
+void draw_section(section *sec) {
   draw_room(sec->c.x1, sec->c.y1,
       sec->c.x2 - sec->c.x1 + 1, sec->c.y2 - sec->c.y1 + 1);
 }
@@ -175,7 +175,7 @@ void draw_section(struct section *sec) {
 void create_sections() {
     // Sector number / sector coordinate
     unsigned char secn_x, secn_y, secc_x, secc_y;
-    struct section *sec = sections[0];
+    section *sec = sections[0];
 
     for (secn_y = 0, secc_y = 0; secn_y != SEC_COUNT_Y; secn_y++, secc_y += SEC_HEIGHT) {
       for (secn_x = 0, secc_x = 0; secn_x != SEC_COUNT_X; secn_x++, secc_x += SEC_WIDTH) {
@@ -205,7 +205,7 @@ void create_random_corridor_y(
 }
 
 void create_corridor(char x1, char y1, char x2, char y2, unsigned char dir) {
-  struct section *sec1, *sec2;
+  section *sec1, *sec2;
 
   if (can_go[y1][x1][dir]) {
     x2 = x1; y2 = y1;
@@ -360,7 +360,7 @@ bool is_actor(char ch) {
 
 void init_actors() {
   unsigned char i;
-  struct actor *p = actors;
+  actor *p = actors;
 
   for (i = ACTOR_COUNT; i; i--) {
     p->hp = 0;
@@ -368,8 +368,8 @@ void init_actors() {
   }
 }
 
-struct actor *create_actor(unsigned char x, unsigned char y, char ch) {
-  struct actor *p = actors;
+actor *create_actor(unsigned char x, unsigned char y, char ch) {
+  actor *p = actors;
   unsigned int i;
 
   for (i = 0; i != actor_count && p->hp; i++) {
@@ -394,9 +394,9 @@ struct actor *create_actor(unsigned char x, unsigned char y, char ch) {
   return p;
 }
 
-struct actor *create_actor_somewhere(char ch) {
+actor *create_actor_somewhere(char ch) {
   unsigned char x, y;
-  struct section *sec;
+  section *sec;
 
   do {
     x = rand() % SEC_COUNT_X;
@@ -410,8 +410,8 @@ struct actor *create_actor_somewhere(char ch) {
   return create_actor(x, y, ch);
 }
 
-struct actor *actor_at(unsigned char x, unsigned char y) {
-  struct actor *p = actors;
+actor *actor_at(unsigned char x, unsigned char y) {
+  actor *p = actors;
   unsigned int i;
 
   if (!is_actor(map[y][x])) {
@@ -428,23 +428,23 @@ struct actor *actor_at(unsigned char x, unsigned char y) {
   return NULL;
 }
 
-bool can_move_actor(struct actor *p, char dx, char dy) {
+bool can_move_actor(actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
   return is_ground(map[y][x]);
 }
 
-void attack_actor(struct actor *atk, struct actor *def) {
+void attack_actor(actor *atk, actor *def) {
   def->hp--;
   if (!def->hp) {
     map[def->y][def->x] = def->ground_ch;
   }
 }
 
-void move_actor(struct actor *p, char dx, char dy) {
+void move_actor(actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
-  struct actor *other = actor_at(x, y);
+  actor *other = actor_at(x, y);
 
   if (other) {
     attack_actor(p, other);
@@ -459,7 +459,7 @@ void move_actor(struct actor *p, char dx, char dy) {
 }
 
 void move_actors() {
-  struct actor *p;
+  actor *p;
   unsigned char i;
 
   for (i = 0, p = actors; i != actor_count; i++, p++) {
@@ -470,7 +470,7 @@ void move_actors() {
 }
 
 void draw_actors() {
-  struct actor *p;
+  actor *p;
   unsigned char i;
 
   for (i = 0, p = actors; i != actor_count; i++, p++) {
@@ -480,14 +480,14 @@ void draw_actors() {
   }
 }
 
-void act_move_keys(struct actor *p) {
+void act_move_keys(actor *p) {
   if (kp & PORT_A_KEY_UP) { move_actor(p, 0, -1); }
   if (kp & PORT_A_KEY_DOWN) { move_actor(p, 0, 1); }
   if (kp & PORT_A_KEY_LEFT) { move_actor(p, -1, 0); }
   if (kp & PORT_A_KEY_RIGHT) { move_actor(p, 1, 0); }
 }
 
-void act_move_random(struct actor *p) {
+void act_move_random(actor *p) {
   char x = 0, y = 0;
   unsigned char dir = rand() & DIR_MASK;
   unsigned char tries = 4;
@@ -507,7 +507,7 @@ void act_move_random(struct actor *p) {
 }
 
 void create_enemy() {
-  struct actor *enm = create_actor_somewhere('e');
+  actor *enm = create_actor_somewhere('e');
   enm->handler = act_move_random;
 }
 
@@ -615,6 +615,6 @@ void main(void) {
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'
-SMS_EMBED_SDSC_HEADER(0,5, 2015,9,9, "Haroldo-OK\\2015", "SMS-Rogue",
+SMS_EMBED_SDSC_HEADER(0,6, 2015,9,10, "Haroldo-OK\\2015", "SMS-Rogue",
   "A roguelike for the Sega Master System - https://github.com/haroldo-ok/sms-rogue.\n"
   "Built using devkitSMS & SMSlib - https://github.com/sverx/devkitSMS");
