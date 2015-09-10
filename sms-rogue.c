@@ -406,11 +406,17 @@ struct actor *create_actor_somewhere(char ch) {
   return create_actor(x, y, ch);
 }
 
+bool can_move_actor(struct actor *p, char dx, char dy) {
+  unsigned char x = p->x + dx;
+  unsigned char y = p->y + dy;
+  return is_ground(map[y][x]);
+}
+
 void move_actor(struct actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
 
-  if (is_ground(map[y][x])) {
+  if (can_move_actor(p, dx, dy)) {
       map[p->y][p->x] = p->ground_ch;
       p->x = x; p->y = y;
       map[p->y][p->x] = p->ch;
@@ -448,13 +454,17 @@ void act_move_keys(struct actor *p) {
 
 void act_move_random(struct actor *p) {
   char x = 0, y = 0;
+  unsigned char dir = rand() & DIR_MASK;
+  unsigned char tries = 4;
 
-  switch (rand() & DIR_MASK) {
-    case DIR_UP: y = -1; break;
-    case DIR_DOWN: y = 1; break;
-    case DIR_LEFT: x = -1; break;
-    case DIR_RIGHT: x = 1; break;
-  }
+  do {
+    switch (dir) {
+      case DIR_UP: y = -1; break;
+      case DIR_DOWN: y = 1; break;
+      case DIR_LEFT: x = -1; break;
+      case DIR_RIGHT: x = 1; break;
+    }
+  } while(tries-- && !can_move_actor(p, x, y));
 
   move_actor(p, x, y);
 }
