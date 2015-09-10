@@ -52,6 +52,7 @@ struct actor actors[ACTOR_COUNT];
 unsigned char actor_count = 0;
 
 struct actor *player;
+unsigned short kp;
 
 void putchar (char c) {
 	SMS_setTile(c - 32);
@@ -438,6 +439,13 @@ void draw_actors() {
   }
 }
 
+void act_move_keys(struct actor *p) {
+  if (kp & PORT_A_KEY_UP) { move_actor(p, 0, -1); }
+  if (kp & PORT_A_KEY_DOWN) { move_actor(p, 0, 1); }
+  if (kp & PORT_A_KEY_LEFT) { move_actor(p, -1, 0); }
+  if (kp & PORT_A_KEY_RIGHT) { move_actor(p, 1, 0); }
+}
+
 void act_move_random(struct actor *p) {
   char x = 0, y = 0;
 
@@ -485,8 +493,6 @@ void title_screen() {
 
 void simple_rl(void)
 {
-  unsigned short kp;
-
   clear_map();
   init_actors();
 
@@ -495,6 +501,8 @@ void simple_rl(void)
   draw_map();
 
   player = create_actor_somewhere('@');
+  player->handler = act_move_keys;
+
   create_actor_somewhere('>');
   create_enemy();
   create_enemy();
@@ -506,11 +514,6 @@ void simple_rl(void)
     kp = SMS_getKeysPressed();
 
     SMS_waitForVBlank();
-
-    if (kp & PORT_A_KEY_UP) { move_actor(player, 0, -1); }
-    if (kp & PORT_A_KEY_DOWN) { move_actor(player, 0, 1); }
-    if (kp & PORT_A_KEY_LEFT) { move_actor(player, -1, 0); }
-    if (kp & PORT_A_KEY_RIGHT) { move_actor(player, 1, 0); }
 
     if (kp) {
       move_actors();
