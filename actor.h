@@ -1,0 +1,28 @@
+#ifndef _ACTOR_H
+#define _ACTOR_H
+
+#define ACTOR_COUNT 64
+
+typedef struct _actor {
+  char ch, ground_ch;
+  unsigned char x, y;
+  unsigned int hp;
+  bool dirty;
+
+  void (*handler)(struct _actor *p);
+} actor;
+
+extern actor actors[ACTOR_COUNT];
+extern unsigned char actor_count;
+
+extern actor *player;
+
+extern actor *create_actor_somewhere(char ch);
+extern void create_player();
+extern void create_enemy();
+
+extern void init_actors();
+extern void move_actors();
+extern void draw_actors();
+
+#endif // _ACTOR_H
