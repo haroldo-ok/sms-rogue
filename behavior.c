@@ -35,3 +35,10 @@ void act_move_random(actor *p) {
     move_actor(p, x, y);
   }
 }
+
+void itr_suffer_attack(actor *self, actor *other) {
+  self->hp--;
+  if (!self->hp) {
+    map[self->y][self->x] = self->ground_ch;
+  }
+}

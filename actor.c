@@ -45,6 +45,7 @@ actor *create_actor(unsigned char x, unsigned char y, char ch) {
   p->hp = 1;
   p->dirty = true;
   p->handler = NULL;
+  p->on_interact = itr_suffer_attack;
 
   return p;
 }
@@ -89,20 +90,15 @@ bool can_move_actor(actor *p, char dx, char dy) {
   return is_ground(map[y][x]);
 }
 
-void attack_actor(actor *atk, actor *def) {
-  def->hp--;
-  if (!def->hp) {
-    map[def->y][def->x] = def->ground_ch;
-  }
-}
-
 void move_actor(actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
   actor *other = actor_at(x, y);
 
   if (other) {
-    attack_actor(p, other);
+    if (p->on_interact) {
+      other->on_interact(other, p);
+    }
     return;
   }
 
