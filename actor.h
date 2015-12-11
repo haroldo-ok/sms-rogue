@@ -25,4 +25,7 @@ extern void init_actors();
 extern void move_actors();
 extern void draw_actors();
 
+extern bool can_move_actor(actor *p, char dx, char dy);
+extern void move_actor(actor *p, char dx, char dy);
+
 #endif // _ACTOR_H

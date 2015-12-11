@@ -17,7 +17,7 @@ sms-rogue.rel: gfx.c
 %.sms:	%.ihx
 	ihx2sms $< $@
 
-sms-rogue.ihx:	sms-rogue.rel SMSlib/SMSlib.rel gfx.rel map.rel actor.rel
+sms-rogue.ihx:	sms-rogue.rel SMSlib/SMSlib.rel gfx.rel map.rel actor.rel behavior.rel
 	$(CC) --data-loc 0xC000 $^
 
 clean:
