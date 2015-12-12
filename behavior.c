@@ -47,6 +47,10 @@ void itr_suffer_attack(actor *self, actor *other) {
   }
 }
 
+void itr_player(actor *self, actor *other) {
+  itr_suffer_attack(self, other);
+}
+
 void itr_enemy(actor *self, actor *other) {
   if (is_player(other)) {
     itr_suffer_attack(self, other);

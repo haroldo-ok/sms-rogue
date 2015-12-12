@@ -134,6 +134,7 @@ void draw_actors() {
 void create_player() {
   player = create_actor_somewhere('@');
   player->handler = act_move_keys;
+  player->on_interact = itr_player;
   player->hp = 5;
 }
 
