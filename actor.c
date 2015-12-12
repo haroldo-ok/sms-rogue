@@ -45,6 +45,7 @@ actor *create_actor(unsigned char x, unsigned char y, char ch) {
   p->hp = 1;
   p->dirty = true;
   p->handler = NULL;
+  p->on_interact = NULL;
 
   return p;
 }
@@ -89,20 +90,15 @@ bool can_move_actor(actor *p, char dx, char dy) {
   return is_ground(map[y][x]);
 }
 
-void attack_actor(actor *atk, actor *def) {
-  def->hp--;
-  if (!def->hp) {
-    map[def->y][def->x] = def->ground_ch;
-  }
-}
-
 void move_actor(actor *p, char dx, char dy) {
   unsigned char x = p->x + dx;
   unsigned char y = p->y + dy;
   actor *other = actor_at(x, y);
 
   if (other) {
-    attack_actor(p, other);
+    if (other->on_interact) {
+      other->on_interact(other, p);
+    }
     return;
   }
 
@@ -138,10 +134,17 @@ void draw_actors() {
 void create_player() {
   player = create_actor_somewhere('@');
   player->handler = act_move_keys;
+  player->on_interact = itr_player;
   player->hp = 5;
 }
 
 void create_enemy() {
   actor *enm = create_actor_somewhere('e');
   enm->handler = act_move_random;
+  enm->on_interact = itr_enemy;
+}
+
+void create_down_stairs() {
+  actor *stairs = create_actor_somewhere('>');
+  stairs->on_interact = itr_down_stairs;
 }

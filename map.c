@@ -9,6 +9,8 @@
 section sections[SEC_COUNT_Y][SEC_COUNT_Y];
 char map[PF_HEIGHT][PF_WIDTH];
 
+bool moved_downstairs;
+
 void clear_map() {
   memset(*map, ' ', PF_WIDTH * PF_HEIGHT);
 }

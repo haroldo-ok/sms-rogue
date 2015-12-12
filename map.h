@@ -33,6 +33,8 @@ typedef struct _section {
 extern section sections[SEC_COUNT_Y][SEC_COUNT_Y];
 extern char map[PF_HEIGHT][PF_WIDTH];
 
+extern bool moved_downstairs;
+
 extern void clear_map();
 extern void generate_map();
 extern void draw_map();

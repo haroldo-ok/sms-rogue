@@ -10,6 +10,7 @@ typedef struct _actor {
   bool dirty;
 
   void (*handler)(struct _actor *p);
+  void (*on_interact)(struct _actor *self, struct _actor *other);
 } actor;
 
 extern actor actors[ACTOR_COUNT];
@@ -20,6 +21,7 @@ extern actor *player;
 extern actor *create_actor_somewhere(char ch);
 extern void create_player();
 extern void create_enemy();
+extern void create_down_stairs();
 
 extern void init_actors();
 extern void move_actors();
