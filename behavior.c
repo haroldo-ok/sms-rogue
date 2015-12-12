@@ -56,3 +56,9 @@ void itr_enemy(actor *self, actor *other) {
     itr_suffer_attack(self, other);
   }
 }
+
+void itr_down_stairs(actor *self, actor *other) {
+  if (is_player(other)) {
+    moved_downstairs = true;
+  }
+}

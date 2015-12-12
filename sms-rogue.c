@@ -47,6 +47,8 @@ void title_screen() {
 
 void simple_rl(void)
 {
+	SMS_displayOff();
+
   clear_map();
   init_actors();
 
@@ -55,7 +57,7 @@ void simple_rl(void)
 
   create_player();
 
-  create_actor_somewhere('>');
+  create_down_stairs();
   create_enemy();
   create_enemy();
   create_enemy();
@@ -65,7 +67,8 @@ void simple_rl(void)
 
   SMS_displayOn();
 
-  while (true) {
+	moved_downstairs = false;
+  while (!moved_downstairs) {
     kp = SMS_getKeysPressed();
 
     SMS_waitForVBlank();
@@ -115,7 +118,9 @@ void main(void) {
   SMS_setSpritePaletteColor(01,0x3f);     // white
 
   title_screen();
-  simple_rl();
+	while (true) {
+		simple_rl();
+	}
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'

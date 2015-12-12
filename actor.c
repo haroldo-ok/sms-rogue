@@ -143,3 +143,8 @@ void create_enemy() {
   enm->handler = act_move_random;
   enm->on_interact = itr_enemy;
 }
+
+void create_down_stairs() {
+  actor *stairs = create_actor_somewhere('>');
+  stairs->on_interact = itr_down_stairs;
+}
