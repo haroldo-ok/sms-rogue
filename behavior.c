@@ -10,6 +10,10 @@
 
 extern unsigned short kp; // TODO: Find out better way of sharing keypress data
 
+bool is_player(actor *p) {
+  return p->ch == '@';
+}
+
 void act_move_keys(actor *p) {
   if (kp & PORT_A_KEY_UP) { move_actor(p, 0, -1); }
   if (kp & PORT_A_KEY_DOWN) { move_actor(p, 0, 1); }
@@ -40,5 +44,11 @@ void itr_suffer_attack(actor *self, actor *other) {
   self->hp--;
   if (!self->hp) {
     map[self->y][self->x] = self->ground_ch;
+  }
+}
+
+void itr_enemy(actor *self, actor *other) {
+  if (is_player(other)) {
+    itr_suffer_attack(self, other);
   }
 }

@@ -45,7 +45,7 @@ actor *create_actor(unsigned char x, unsigned char y, char ch) {
   p->hp = 1;
   p->dirty = true;
   p->handler = NULL;
-  p->on_interact = itr_suffer_attack;
+  p->on_interact = NULL;
 
   return p;
 }
@@ -96,7 +96,7 @@ void move_actor(actor *p, char dx, char dy) {
   actor *other = actor_at(x, y);
 
   if (other) {
-    if (p->on_interact) {
+    if (other->on_interact) {
       other->on_interact(other, p);
     }
     return;
@@ -140,4 +140,5 @@ void create_player() {
 void create_enemy() {
   actor *enm = create_actor_somewhere('e');
   enm->handler = act_move_random;
+  enm->on_interact = itr_enemy;
 }
